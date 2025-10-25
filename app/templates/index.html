@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Health Diagnosis App</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <h1>Smart Health Diagnosis App</h1>
+    <div class="card">
+      <form id="predictForm">
+        <label for="symptoms">Enter Symptoms (comma separated):</label>
+        <input
+          type="text"
+          id="symptoms"
+          name="symptoms"
+          placeholder="fever, cold"
+          autocomplete="off"
+          required
+        />
+        <button type="submit">Predict Disease</button>
+      </form>
+
+      <div id="result"></div>
+
+      <section class="symptom-list-section">
+        <h2>Available Symptoms</h2>
+        <div class="symptom-list">
+          {% for symptom in symptoms %}
+            <span class="symptom-tag">{{ symptom }}</span>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('predictForm').onsubmit = async function (e) {
+      e.preventDefault();
+      const symptoms = document
+        .getElementById('symptoms')
+        .value.split(',')
+        .map(s => s.trim().toLowerCase());
+      if (symptoms.length === 0 || (symptoms.length === 1 && symptoms[0] === '')) {
+        alert('Please enter at least one symptom.');
+        return;
+      }
+      const response = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symptoms }),
+      });
+      const data = await response.json();
+      document.getElementById('result').innerHTML = `<h3>Prediction: ${data.prediction}</h3>`;
+    };
+  </script>
+</body>
+</html>
